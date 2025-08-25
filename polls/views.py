@@ -1,5 +1,7 @@
 from django.http import HttpResponse
 from .models import Article, Memo
+#장고 페이지 구성의 핵심
+from django.shortcuts import render
 
 def index(request):
     return HttpResponse("Hello, polls!")
@@ -269,3 +271,14 @@ def one_memo(request, memo_id) :
         {memo.created_at}
     """
     return HttpResponse(content)
+
+#from django.shortcuts import render 내용 하기, 저거 추가해야 함
+#index에서 context 만들어서 보내기
+def index(request) :
+    memos = Memo.objects.all()
+    context = {
+        "name" : "lion",
+        "title" : "장고 학습",
+        "memos" : memos
+    }
+    return render(request=request, template_name="polls/index.html", context=context)  #경로에서 templatesd 아래부터 적기
