@@ -282,3 +282,7 @@ def index(request) :
         "memos" : memos
     }
     return render(request=request, template_name="polls/index.html", context=context)  #경로에서 templatesd 아래부터 적기
+
+def search(request) :
+    query = request.GET['q']
+    return HttpResponse(f"{query}가 검색되었습니다")

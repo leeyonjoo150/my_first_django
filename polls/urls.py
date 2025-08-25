@@ -1,6 +1,6 @@
 from django.urls import path
 #원하는 뷰를 가져오는 형태
-from .views import index, hello, lion, good, debug_request, memo_list, one_memo, index
+from .views import index, hello, lion, good, debug_request, memo_list, one_memo, index, search
 #이렇게도 가능
 #from polls import index, hello, lion, good, debug_request
 
@@ -14,7 +14,8 @@ urlpatterns = [
     #path("", debug_request),
     path("memo/", memo_list),    #메모리스트 틀 확인용
     path("memo/<int:memo_id>", one_memo),    #int 뒤의 memo_id는 view의 one_memo(memo_id)의 매개변수와 같아야함
-    path("", index)
+    path("", index),
+    path("search/", search)
 ]
 
 #이렇게 해도 됨, 마음에 드는 방식대로 하면 됨
