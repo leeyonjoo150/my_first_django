@@ -140,3 +140,19 @@ LOGOUT_REDIRECT_URL = '/'
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR/'media'
 LIKELION=900
+#충돌 상황 해결
+#1. 현재는 main 브랜치
+#2. dev1 브랜치 생성 (git switch -c dev1)
+#3. config/setting.py 파일에 코드 작성 common_val = 123
+#4. add, commit(다음에는 푸시까지)
+
+#5.main 브랜치로 이동
+#6. dev2 브랜치 생성
+#7. config/setting.py 파일에 코드 작성 common_val = 888
+#8. add, commit(나중에는 푸시까지)
+#9. 메인 브랜치로 이동
+
+#10. main에서 dev1 브랜치를 머지(git merge dev1)
+#11. main에서 dev2 브랜치를 머지
+#12. vscode 화면에서 코드를 확인하고 남길 내용 남기고 <<<< ==== >>>> 삭제 -> 저장
+#13. 커밋 푸시
