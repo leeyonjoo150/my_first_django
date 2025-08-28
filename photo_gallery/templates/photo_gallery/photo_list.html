@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title|default:"사진 갤러리" }}</title>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'polls:index' %}">메인</a> |
+        <a href="{% url 'photo_gallery:photo_list' %}">갤러리</a> |
+        {% if user.is_authenticated %}
+            <a href="{% url 'photo_gallery:photo_create' %}">사진 업로드</a> |
+            <a href="{% url 'photo_gallery:my_photos' %}">내 사진</a> |
+            <span>{{ user.username }}님</span>
+            <a href="{% url 'accounts:logout' %}">로그아웃</a>
+        {% else %}
+            <a href="{% url 'accounts:login' %}">로그인</a>
+        {% endif %}
+    </nav>
+
+    <h1>{{ title|default:"Daily Snap 갤러리" }}</h1>
+    <p>매일의 순간을 사진으로 기록합니다</p>
+
+    <!-- 카테고리 필터 -->
+    <div>
+        <a href="{% url 'photo_gallery:photo_list' %}">전체</a>
+        {% for value, label in categories %}
+            <a href="?category={{ value }}">{{ label }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- 사진 목록 -->
+    <div>
+        {% for photo in page_obj %}
+        <div>
+            <a href="{% url 'photo_gallery:photo_detail' photo.pk %}">
+                {% if photo.thumbnail %}
+                    <img src="{{ photo.thumbnail.url }}" alt="{{ photo.title }}" width="300">
+                {% else %}
+                    <img src="{{ photo.photo.url }}" alt="{{ photo.title }}" width="300">
+                {% endif %}
+            </a>
+            <h3>{{ photo.title }}</h3>
+            <p>작성자: {{ photo.author.username }}</p>
+            <p>{{ photo.photo_date|date:"Y.m.d" }}</p>
+            <p>❤️ {{ photo.like_count }}</p>
+        </div>
+        {% empty %}
+        <p>아직 사진이 없습니다.</p>
+        {% endfor %}
+    </div>
+
+    <!-- 페이지네이션 -->
+    {% if page_obj.has_other_pages %}
+    <div>
+        {% if page_obj.has_previous %}
+            <a href="?page=1">처음</a>
+            <a href="?page={{ page_obj.previous_page_number }}">이전</a>
+        {% endif %}
+
+        <span>
+            {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">다음</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">마지막</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</body>
+</html>

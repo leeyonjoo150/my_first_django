@@ -1,4 +1,9 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.conf import settings
+from PIL import Image
+import os
+from datetime import date
 
 # Create your models here.
 """
@@ -38,7 +43,22 @@ class Article(models.Model) :
 
 #메모장 기능 실습
 #models, admin, views, urls 다 추가해야함
+from django.contrib.auth.models import User
+#author 추가
+#디버그에서 view에 index에서 브레이크 포인트로 멈추기
+#디버그 콘솔에서 Memo 내용을 조회
+#user = User.objects.get(pk=1)
+#user.memos.all()
 class Memo(models.Model) :  #model을 상속받기
+
+    #작성자 필드 추가
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='memos',
+        verbose_name='작성자'
+    )
+
     #제목, 내용, 중요여부, 생성일
     title = models.CharField('제목', max_length=200)
     content = models.TextField('내용')

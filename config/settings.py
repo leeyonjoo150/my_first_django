@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'polls' #우리가 만든 앱 추가
+    'polls', #우리가 만든 앱 추가
+    'accounts',
+    'photo_gallery'
 ]
 
 MIDDLEWARE = [
@@ -52,10 +54,15 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'config.urls'
 
+# 1. 프로젝트 루트에 templates 라는 폴더 생성
+# 2. templates 프로젝트 루트에 common 이라는 폴더 생성
+# 3. settings.py에 추가 -> 'DIRS' : [BASE_DIR / 'templates']
+# 4. polls에서 extends(상속 부분) 경로를 변경 polls/base.html -> common/base.html
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -116,8 +123,20 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'my_static'
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#accounts앱에 대해 추가
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR/'media'
+LIKELION=900

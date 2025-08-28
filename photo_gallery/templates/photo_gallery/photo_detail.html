@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ photo.title }}</title>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'photo_gallery:photo_list' %}">갤러리로 돌아가기</a>
+    </nav>
+
+    <!-- 이전/다음 네비게이션 -->
+    <div>
+        {% if prev_photo %}
+            <a href="{% url 'photo_gallery:photo_detail' prev_photo.pk %}">← 이전 사진</a>
+        {% endif %}
+
+        {% if next_photo %}
+            <a href="{% url 'photo_gallery:photo_detail' next_photo.pk %}">다음 사진 →</a>
+        {% endif %}
+    </div>
+
+    <!-- 사진 -->
+    <div>
+        <img src="{{ photo.photo.url }}" alt="{{ photo.title }}">
+    </div>
+
+    <!-- 사진 정보 -->
+    <div>
+        <h1>{{ photo.title }}</h1>
+
+        <p>📷 {{ photo.author.username }}</p>
+        <p>📅 {{ photo.photo_date|date:"Y년 m월 d일" }}</p>
+        <p>🏷️ {{ photo.get_category_display }}</p>
+        <p>{% if photo.is_public %}🌍 공개{% else %}🔒 비공개{% endif %}</p>
+
+        {% if photo.description %}
+        <div>
+            {{ photo.description|linebreaks }}
+        </div>
+        {% endif %}
+
+        <!-- 좋아요 (폼 방식) -->
+        <div>
+            {% if user.is_authenticated %}
+                <form method="post" action="{% url 'photo_gallery:photo_like' photo.pk %}">
+                    {% csrf_token %}
+                    {% if user_liked %}
+                        <button type="submit">❤️ 좋아요 취소 ({{ like_count }})</button>
+                    {% else %}
+                        <button type="submit">🤍 좋아요 ({{ like_count }})</button>
+                    {% endif %}
+                </form>
+            {% else %}
+                <p>❤️ {{ like_count }}명이 좋아합니다</p>
+                <p><a href="{% url 'accounts:login' %}">로그인</a>하면 좋아요를 누를 수 있습니다.</p>
+            {% endif %}
+        </div>
+
+        <!-- 작성자만 수정/삭제 -->
+        {% if user == photo.author %}
+        <div>
+            <a href="{% url 'photo_gallery:photo_update' photo.pk %}">수정</a>
+            <a href="{% url 'photo_gallery:photo_delete' photo.pk %}">삭제</a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

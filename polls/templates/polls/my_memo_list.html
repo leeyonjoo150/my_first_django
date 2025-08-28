@@ -1,0 +1,39 @@
+{% extends 'common/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h1>메모 목록</h1>
+    <a href="{% url 'polls:memo_create' %}" class="btn btn-sm btn-outline-primary mt-2">새 메모 작성</a>
+
+    
+    <!-- 메모 리스트 -->
+    <div class="row mt-3">
+        {% for memo in memos %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        {% if memo.is_important %}
+                            <span class="badge bg-warning">중요</span>
+                        {% endif %}
+                        {{ memo.title }}
+                    </h5>
+                    <p class="card-text">{{ memo.content|truncatewords:20 }}</p>
+                    <small class="text-muted">
+                        <i class="fas fa-user"></i> 작성자: {{ memo.author|default:"관리자" }}
+                    </small>
+                    <small class="text-muted ms-3">{{ memo.created_at|date:"Y-m-d" }}</small>
+                    <br>
+                    <a href="{% url 'polls:memo_detail' memo.pk %}" class="btn btn-sm btn-outline-primary mt-2">상세보기</a>
+                    <a href="{% url 'polls:memo_update' memo.pk %}" class="btn btn-sm btn-outline-primary mt-2">수정하기</a>
+                    <a href="{% url 'polls:memo_delete' memo.pk %}" class="btn btn-sm btn-outline-primary mt-2">삭제하기</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center">아직 메모가 없습니다.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'common/base.html' %}
+
+{% block title %}{{ memo.title }} - Django Blog{% endblock %}
+
+{% block meta_description %}{{ memo.content|truncatewords:20 }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- 메모 상세 정보 -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title mb-0">
+                        {% if memo.is_important %}
+                            <span class="badge bg-warning me-2">중요</span>
+                        {% endif %}
+                        {{ memo.title }}
+                    </h1>
+                </div>
+                <div class="card-body">
+                    <!-- 메타 정보 -->
+                    <div class="row mb-3">
+                        <div class="col-sm-6">
+                            <small class="text-muted">
+                                <i class="fas fa-user"></i> 작성자: {{ memo.author|default:"관리자" }}
+                            </small>
+                        </div>
+                        <div class="col-sm-6 text-sm-end">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> 작성일: {{ memo.created_at|date:"Y년 m월 d일" }}
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- 메모 내용 -->
+                    <div class="memo-content">
+                        {{ memo.content|linebreaks }}
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'polls:memo_list' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-list"></i> 목록으로
+                    </a>
+                    <a href="{% url 'polls:memo_update' memo.pk %}" class="btn btn-outline-primary">
+                        <i class="fas fa-list"></i> 수정하기
+                    </a>
+                    <a href="{% url 'polls:memo_delete' memo.pk %}" class="btn btn-outline-primary">
+                        <i class="fas fa-list"></i> 삭제하기
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.memo-content {
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.badge {
+    font-size: 0.8em;
+}
+</style>
+{% endblock %}

@@ -1,7 +1,8 @@
+from pyexpat.errors import messages
 from django.http import HttpResponse
 from .models import Article, Memo
 #장고 페이지 구성의 핵심
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render, redirect
 
 def index(request):
     return HttpResponse("Hello, polls!")
@@ -242,17 +243,23 @@ def debug_request(request) :
 #from .models import Article, Memo 이거 하기
 #메모리스트를 보여주는 뷰를 만들어 보겠습니다.
 #path('memo/', memo_list)경로 만들어서 화면 틀 확인하기
-def memo_list(self) :
+# def memo_list(self) :
+def memo_list(request) :
     #메모 전체 가져오기
-    all_memo = Memo.objects.all()
+    #all_memo = Memo.objects.all()
     #content 구성하기
-    content = ""
-    for memo in all_memo :
-        content += "제목 : " + memo.title + "<br>"
-        content += "내용 : " + memo.content + "<br>"
-        content += "----" * 10 + "<br>"
+    # content = ""
+    # for memo in all_memo :
+    #     content += "제목 : " + memo.title + "<br>"
+    #     content += "내용 : " + memo.content + "<br>"
+    #     content += "----" * 10 + "<br>"
 
-    return HttpResponse(content)
+    # return HttpResponse(content)
+    memos = Memo.objects.all().order_by('-created_at')
+    context = {
+        "memos" : memos
+    }
+    return render(request, 'polls/memo_list.html', context)
 
 #content = "제목 : 타이틀
 # 내용 : 콘텐트
@@ -263,26 +270,153 @@ def memo_list(self) :
 # .
 # " enter -> <br>
 
-def one_memo(request, memo_id) :
-    memo = Memo.objects.get(id=memo_id)
-    content = f"""<h1>제목 : {memo.title}</h1> <br><br>
-        내용 : {memo.content} <br>
-        {memo.is_important}<br>
-        {memo.created_at}
-    """
-    return HttpResponse(content)
+def memo_detail(request, pk) :
+    memo = get_object_or_404(Memo, pk=pk)
+    return render(request, 'polls/memo_detail.html', {'memo': memo})
 
 #from django.shortcuts import render 내용 하기, 저거 추가해야 함
 #index에서 context 만들어서 보내기
 def index(request) :
-    memos = Memo.objects.all()
-    context = {
-        "name" : "lion",
-        "title" : "장고 학습",
-        "memos" : memos
-    }
-    return render(request=request, template_name="polls/index.html", context=context)  #경로에서 templatesd 아래부터 적기
+    # memos = Memo.objects.all()
+    # context = {
+    #     "name" : "lion",
+    #     "title" : "장고 학습",
+    #     "memos" : memos
+    # }
+    # return render(request=request, template_name="polls/index.html", context=context)  #경로에서 templatesd 아래부터 적기
+    return render(request=request, template_name="polls/index.html")
+
+#디버깅할때 
+#아무것도 로그인 정보가 없으면
+#from django.contrib.auth.models import User
+#User 하면 뭔가 나오고
+#User.objects.all()하면 유저 리스트가 나옴
+#from polls.models import Memo
+#Memo.objects.all() 하면 메모 리스트가 나옴
+#1번 아이디의 유저가 쓴 메모리스트를 뽑고싶다면
+#user=User.objects.get(pk=1)
+#Memo.objects.filter(author=user) 이렇게 하면 리스트 좌라락 나옴
+#user.memos.all()하면 걍 전체 메모리스트 뽑을 수 있음 맨 위에처럼 여러번 안해도 됨
+
 
 def search(request) :
     query = request.GET['q']
     return HttpResponse(f"{query}가 검색되었습니다")
+
+from .forms import MemoModelForm
+from django.contrib.auth.decorators import login_required
+
+@login_required
+#request.user 이런식으로 유저 로그인 정보 확인 가능 디버깅
+def memo_create(request) :
+    if request.method == "POST" :
+        # 원래는title = request.POST.get['title']
+        #  그렇다면 form ??
+        # return ??
+        form = MemoModelForm(request.POST)
+        if form.is_valid() :
+            #폼 저장하고 페이지 화면 어떻게 처리할래?
+            # 1. 메모 리스트로 가기?
+            #form.save()
+            #return redirect('polls:memo_list')
+            # 2. 지금 작성한 메모를 보여주기? detail
+            #memo = form.save()
+            #------------------------------------------
+            #이제 로그인해야 글 쓰기 기능 할거임
+            #직접 입력되지 않는 정보(ex - user)를 추가 입력할때는 form.save(commit=False)를 사용한다!
+            memo = form.save(commit=False)  #작가정보 입력됐는지 확인 전에 잠깐 멈추라는 뜻
+            memo.author = request.user      #request.user에서 작가정보 가져와서 memo.author에 넣기
+            memo.save()
+            pk = memo.id
+            return redirect('polls:memo_detail', pk=pk) #redirect에는 request를 전달하지 않음
+        # 1.form을 이용해서 저장하는 프로세스 체크
+        # 2. 페이지 요청할때, 인자를 담아서 보내기
+        # 3. 과제 -> memo detail 페이지 기존에 하드코딩된 형태에서 template 이용한 내용으로 변경하기
+    else :
+        form = MemoModelForm()
+        context = {
+            'form' : form
+        }
+        return render(request, 'polls/memo_create.html', context)
+    # #디버깅할때는 pass 입력해보기(여기 뿐만 아니라 모두)
+    # # step 1
+    # # 고객이 입력할 수 있는 화면 보여주기
+    # #get으로 요청이 오면, 이거는 주소로 접근하는 거라서, 입력 폼을 보여줍니다
+    # if request.method == 'GET' :
+    #     return render(request, 'polls/memo_create.html')
+    # #post로 요청이 오면, DB에 입력하라는 요청임으로 DB입력 처리를 끝내고, 다른 페이지를 보여줍니다
+    # #리턴값 디버깅 입력할때는 get으로 확인할거면 request.GET['title'] 이런 식으로
+    # #Memo.Objects.create(title, content) 이게 제대로
+
+    # # step 2
+    # # 고객이 입력한 정보를 확인 -> 고객이 입력한 정보 어디있나?
+    # # title, content
+    # # Memo에 입력
+    # # 다음 페이지로 보내기
+    # else :
+    #     title = request.POST.get('title', 'no_title')  #request.POST['title']
+    #     content = request.POST.get('content', 'no_content')
+    #     Memo.objects.create(title=title, content=content)
+    #     return redirect("polls:memo_list")      #redirect 위에 import에 입력하기
+
+
+def test1(request) :
+    return render(request, 'polls/test1.html')
+
+def test2(request) :
+    return render(request, 'polls/test2.html')
+
+# get_object_or_404 임포트하기
+#에러메세지 임포트 하기
+from pyexpat.errors import messages
+@login_required
+def memo_update(request, pk) :
+    #수정 화면이 나와야지(GET)
+    memo = get_object_or_404(Memo, pk = pk)
+    #여기부터는 작성자권한 하기 전 내용
+    # if request.method == "GET" :
+    #     # memo = Memo.objects.get(pk = pk)
+    #     #메모 내용을 가져와서 넣음, create와 다르게 수정해야하니
+    #     form = MemoModelForm(instance=memo)
+    #     return render(request, 'polls/memo_create.html', {'form' : form})
+    # else :
+    #     form = MemoModelForm(request.POST, instance=memo)
+    #     if form.is_valid() :
+    #         form.save()
+    #         return redirect('polls:memo_datail', pk=pk)
+    if memo.author != request.user :
+        messages.error(request, '자신의 메모만 수정할 수 있습니다.')
+        return redirect('polls:memo_detail', pk=pk)
+    
+    if request.method == "POST" :
+        form = MemoModelForm(request.POST, instance=memo)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '메모가 수정되었습니다.')
+            return redirect('polls:memo_detail', pk=pk)
+    else:
+        form = MemoModelForm(instance=memo)
+        context = {'form' : form}
+        return render(request, 'polls/memo_create.html', context)
+
+def memo_delete(request, pk) :
+    memo = get_object_or_404(Memo, pk=pk)
+    if request.method == "POST" :
+        memo.delete()
+        return redirect("polls:memo_list")
+    return render(request, 'polls/memo_confirm_delete.html', {"memo" : memo})
+
+# 1. CRUD
+# 2. UD에 해당하는 뷰, 템플릿 구성
+# 3. 각 템플릿에
+
+@login_required
+def my_memo_list(request) :
+    #내 메모 인스턴스들 받기
+    #context에 담아서 보내기
+    memos = Memo.objects.filter(author=request.user).order_by('-created_at')
+    #memos = request.objects.user.memos.all()
+    context = {
+        "memos" : memos
+    }
+    return render(request, 'polls/my_memo_list.html', context)
