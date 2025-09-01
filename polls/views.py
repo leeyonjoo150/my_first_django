@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-from django.contrib import messages
-=======
->>>>>>> d36b0f0055804e265e5b2d1a2818c43ba7e2fb46
 from django.http import HttpResponse
 from django.contrib import messages
 from .models import Article, Memo
