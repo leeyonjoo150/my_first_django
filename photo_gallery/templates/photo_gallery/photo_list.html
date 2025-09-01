@@ -11,9 +11,9 @@
             <a href="{% url 'photo_gallery:photo_create' %}">사진 업로드</a> |
             <a href="{% url 'photo_gallery:my_photos' %}">내 사진</a> |
             <span>{{ user.username }}님</span>
-            <a href="{% url 'accounts:logout' %}">로그아웃</a>
+            <a href="{% url 'accounts:logout_view' %}">로그아웃</a>
         {% else %}
-            <a href="{% url 'accounts:login' %}">로그인</a>
+            <a href="{% url 'accounts:login_view' %}">로그인</a>
         {% endif %}
     </nav>
 

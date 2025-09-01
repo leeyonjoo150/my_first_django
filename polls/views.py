@@ -1,4 +1,4 @@
-from pyexpat.errors import messages
+from django.contrib import messages
 from django.http import HttpResponse
 from .models import Article, Memo
 #장고 페이지 구성의 핵심
