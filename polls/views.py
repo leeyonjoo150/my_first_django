@@ -1,5 +1,5 @@
-from pyexpat.errors import messages
 from django.http import HttpResponse
+from django.contrib import messages
 from .models import Article, Memo
 #장고 페이지 구성의 핵심
 from django.shortcuts import get_object_or_404, render, redirect
@@ -368,7 +368,7 @@ def test2(request) :
 
 # get_object_or_404 임포트하기
 #에러메세지 임포트 하기
-from pyexpat.errors import messages
+#from django.contrib import messages
 @login_required
 def memo_update(request, pk) :
     #수정 화면이 나와야지(GET)
@@ -399,8 +399,14 @@ def memo_update(request, pk) :
         context = {'form' : form}
         return render(request, 'polls/memo_create.html', context)
 
+@login_required
 def memo_delete(request, pk) :
     memo = get_object_or_404(Memo, pk=pk)
+
+    if memo.author != request.user :
+        messages.error(request, '자신의 메모만 수정할 수 있습니다.')
+        return redirect('polls:memo_detail', pk=pk)
+
     if request.method == "POST" :
         memo.delete()
         return redirect("polls:memo_list")
@@ -416,6 +422,20 @@ def my_memo_list(request) :
     #context에 담아서 보내기
     memos = Memo.objects.filter(author=request.user).order_by('-created_at')
     #memos = request.objects.user.memos.all()
+    context = {
+        "memos" : memos
+    }
+    return render(request, 'polls/my_memo_list.html', context)
+
+from django.db.models import Q
+def memo_search(request) :
+    #base.url의 검색 영역을 form으로 감싸기
+    #polls.urls.py에 검색 url 추가
+    #views에 memo_search 작성 준비
+    query = request.GET.get('q', "")
+    memos = Memo.objects.filter(
+        Q(title__icontains = query) | Q(content__icontains = query)
+    )
     context = {
         "memos" : memos
     }

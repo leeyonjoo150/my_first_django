@@ -39,7 +39,7 @@ def photo_list(request):
     }
     return render(request, 'photo_gallery/photo_list.html', context)
 
-
+@login_required
 def photo_detail(request, pk):
     """사진 상세보기"""
     photo = get_object_or_404(DailyPhoto, pk=pk)
@@ -174,3 +174,31 @@ def my_photos(request):
         'title': '내 사진',
     }
     return render(request, 'photo_gallery/photo_list.html', context)
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+@login_required
+@require_POST
+def photo_like_ajax(request, pk) :
+    #post 방식일때
+    #어떤 게시물인지 가져와서
+    photo = get_object_or_404(DailyPhoto, pk = pk)
+    #현재 좋아요 버튼 누른 유저 확인
+    user = request.user
+    #이 사람이 이전에 좋아요를 했으면  또는 안했으면 반대로 바뀌게
+    if user in photo.likes.all() :
+        photo.likes.remove(user)
+        liked = False
+        message = "좋아요를 취소했습니다!"
+    else :
+        photo.likes.add(user)
+        liked = True
+        message = "좋아요를 눌렀습니다!"
+    #이 게시물의 좋아요 숫자를 찾기
+    like_count = photo.likes.count()
+    #json으로 응답하기
+    return JsonResponse({
+        'liked' : liked,
+        'like_count' : like_count,
+        'message' : message
+    })
